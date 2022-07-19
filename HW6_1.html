@@ -1,0 +1,101 @@
+<html>
+<head>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.6.0/dist/leaflet.css">
+    <script src="https://unpkg.com/leaflet@1.6.0/dist/leaflet.js"></script>
+
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.Default.css">
+    <script src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/leaflet.markercluster.js"></script>
+
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+        }
+        
+        #mapid {
+            width: 100%;
+            height: 100%;
+        }
+
+        .coordinate {
+            font-size: 20px;
+            position: absolute;
+            bottom: 10px;
+            right: 40%;
+        }
+       
+        .toggle{
+           font-size: 20px; 
+           position: absolute;
+           bottom: 10px;
+           left: 20px;
+        }
+    </style>
+
+    <script type="text/javascript">
+    
+        function initialize() {
+            var mymap = L.map('mapid').setView([24.9879, 121.5774], 15);
+            L.tileLayer(
+                'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+                {
+                    minZoom: 8, 
+                    maxZoom: 19
+                }
+            ).addTo(mymap);
+
+            var greenIcon = new L.Icon({
+            iconUrl: 'https://cdn.rawgit.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png',
+            shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+            iconSize: [25, 41],
+            iconAnchor: [12, 41],
+            popupAnchor: [1, -34],
+            shadowSize: [41, 41]
+        });
+
+        var markers = new L.MarkerClusterGroup().addTo(mymap);
+
+        var xhr = new XMLHttpRequest();
+        xhr.open("get","https://raw.githubusercontent.com/kiang/pharmacies/master/json/points.json");
+        xhr.send();
+        xhr.onload = function(){
+
+            var data = JSON.parse(xhr.responseText).features
+
+            for(let i =0;data.length>i;i++){
+  
+                markers.addLayer(L.marker([data[i].geometry.coordinates[1],data[i].geometry.coordinates[0]], {icon: greenIcon}).bindPopup(data[i].properties.name));
+            }
+
+            mymap.addLayer(markers);
+        }
+
+        mymap.on('mousemove', function(e){
+            document.getElementsByClassName('coordinate')[0].innerHTML = 'lat: ' + e.latlng.lat + 'lng: ' + e.latlng.lng; 
+            console.log('lat: ' + e.latlng.lat + 'lng: ' + e.latlng.lng)
+        });
+
+        mymap.on('click', function(){
+            console.log("kkkkkkkkkkkkk");
+            if(mymap.hasLayer(markers)){
+                mymap.removeLayer(markers);
+            }else{
+                markers.addTo(mymap);
+            }
+        });
+    
+        }
+
+
+    </script>
+</head>
+<body onload="initialize()">
+ 
+<div id="mapid" >
+    <div class="leaflet-control coordinate"></div>
+    <div ><input type="button" class="leaflet-control toggle" value="Toggle"></div>
+</div>
+
+ 
+</body></html>
